@@ -668,7 +668,7 @@ export default function App() {
       <footer>
         <p>{t.disclaimer}</p>
         <p>
-          <a href="https://github.com/HarshitBhalani/clearhour" id="repo-link" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/Team-Pranavayu/clearhour" id="repo-link" target="_blank" rel="noopener noreferrer">
             Open source (MIT)
           </a>{' '}
           · Data: Open-Meteo / Copernicus CAMS
