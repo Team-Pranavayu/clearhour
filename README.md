@@ -6,8 +6,7 @@ ClearHour is a free web app that reads the air-quality forecast for any town in 
 
 | | |
 |---|---|
-| **Live app** | **https://clearhour.vercel.app** ← _replace with your Vercel link_ |
-| **Demo video (2–3 min)** | _add link_ |
+| **Live app** | **[clearhour-india.vercel.app](https://clearhour-india.vercel.app)** |
 | **Impact area** | Clean Air |
 | **Hackathon** | Code for a Billion – Bharat Agentic-AI Hackathon 2026 (Code for India) |
 | **License** | [MIT](LICENSE) |
