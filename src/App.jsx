@@ -126,7 +126,7 @@ export default function App() {
   const [speaking, setSpeaking] = useState(false);
   const [installEvt, setInstallEvt] = useState(null);
   const [feedback, setFeedback] = useState(() => (store.get("ch:fb", "") === today() ? "done" : ""));
-  const [tour, setTour] = useState(false);
+  const [tour, setTour] = useState(null); // null | { kind: "start" | "result", ask: boolean }
   const [counts, setCounts] = useState(null); // { visits, yes, no } from our own /api/count
 
   // Send a counted event and show the new public totals.
@@ -278,17 +278,28 @@ export default function App() {
   const rangeNow = range2 && range2.key === rangeKey ? range2 : null;
   const view = when.mode === "range" ? "range" : "next24";
 
+  // Tour, part 1: on the very first visit, on the landing screen (before any city is chosen).
   useEffect(() => {
-    if (result && !store.get("ch:tour", false)) {
-      const id = setTimeout(() => setTour(true), 600);
-      return () => clearTimeout(id);
-    }
-  }, [result]);
+    if (store.get("ch:tour", false)) return;
+    const id = setTimeout(() => setTour((cur) => cur || { kind: "start", ask: true }), 600);
+    return () => clearTimeout(id);
+  }, []);
 
-  function endTour() {
-    setTour(false);
+  // Tour, part 2: right after the first forecast appears, if part 1 was finished (not skipped).
+  useEffect(() => {
+    if (!result || tour || !store.get("ch:tour", false) || store.get("ch:tour2", false)) return;
+    const id = setTimeout(() => setTour({ kind: "result", ask: false }), 600);
+    return () => clearTimeout(id);
+  }, [result, tour]);
+
+  function endTour(finished) {
+    const kind = tour?.kind;
+    setTour(null);
     store.set("ch:tour", true);
+    // Skipping anywhere, or finishing part 2, means no more tour.
+    if (!finished || kind === "result") store.set("ch:tour2", true);
   }
+
   const placeName = !saved ? '' : saved.place.name || (saved.place.mine ? t.myLocation : `${saved.place.lat.toFixed(2)}, ${saved.place.lon.toFixed(2)}`);
 
   // A device-location name came back in the old language: fetch it again in the new one.
@@ -640,8 +651,6 @@ export default function App() {
             </button>
           )}
 
-          {tour && <Tour t={t} onEnd={endTour} />}
-
           <p className="meta">
             {t.updated}:{' '}
             {new Intl.DateTimeFormat(`${lang}-IN`, { dateStyle: 'medium', timeStyle: 'short' }).format(
@@ -651,21 +660,29 @@ export default function App() {
         </main>
       )}
 
+      {tour && (
+        <Tour key={tour.kind} t={t} steps={tour.kind === "start" ? TOUR_START : TOUR_RESULT} ask={tour.ask}
+          thanks={tour.kind === "result"} onEnd={endTour} />
+      )}
+
       <footer>
         <p>{t.disclaimer}</p>
         <p>
-          <a href="https://github.com/" id="repo-link" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/HarshitBhalani/clearhour" id="repo-link" target="_blank" rel="noopener noreferrer">
             Open source (MIT)
           </a>{' '}
           · Data: Open-Meteo / Copernicus CAMS
-          {result && (
-            <>
-              {" · "}
-              <button type="button" className="linkbtn" onClick={() => { window.scrollTo(0, 0); setTour(true); }}>
-                {t.tourAgain}
-              </button>
-            </>
-          )}
+          {" · "}
+          <button
+            type="button"
+            className="linkbtn"
+            onClick={() => {
+              window.scrollTo(0, 0);
+              setTour({ kind: result ? "result" : "start", ask: true });
+            }}
+          >
+            {t.tourAgain}
+          </button>
         </p>
       </footer>
     </div>
@@ -1086,22 +1103,30 @@ function DayCard({ d, lang, t, info, single }) {
   );
 }
 
-const TOUR = [
+// Landing screen: where to start. Steps whose element is not on screen are skipped.
+const TOUR_START = [
+  ['.search', 'tourSearch'],
+  ['.locate', 'tourLocate'],
+  ['.when', 'tourWhen'],
+  ['.langbtn', 'tourLang'],
+  ['.popular', 'tourPopular']
+];
+// After the first forecast: how to read and use it.
+const TOUR_RESULT = [
   ['.hero .big', 'tourBest'],
   ['.who', 'tourGroups'],
-  ['.when', 'tourWhen'],
   ['.hero .actions', 'tourActions'],
-  ['.hero .infobtn', 'tourInfo'],
-  ['.langbtn', 'tourLang']
+  ['.hero .infobtn', 'tourInfo']
 ];
 
-function Tour({ t, onEnd }) {
-  // 'ask' -> 0..n-1 (spotlight steps) -> 'thanks'
-  const [step, setStep] = useState('ask');
+function Tour({ t, steps: TOUR, ask, thanks, onEnd }) {
+  // ['ask'] -> 0..n-1 (spotlight steps) -> ['thanks']
+  const [step, setStep] = useState(ask ? 'ask' : 0);
   const [box, setBox] = useState(null);
   const cardRef = useRef(null);
   const isStep = typeof step === 'number';
-  const next = () => setStep(step === 'ask' ? 0 : step < TOUR.length - 1 ? step + 1 : 'thanks');
+  const done = () => (thanks ? setStep('thanks') : onEnd(true));
+  const next = () => (step === 'ask' ? setStep(0) : step < TOUR.length - 1 ? setStep(step + 1) : done());
 
   useLayoutEffect(() => {
     if (!isStep) return setBox(null);
@@ -1127,7 +1152,7 @@ function Tour({ t, onEnd }) {
 
   useEffect(() => {
     cardRef.current?.querySelector('.tournext')?.focus();
-    const onKey = (e) => e.key === 'Escape' && onEnd();
+    const onKey = (e) => e.key === 'Escape' && onEnd(false);
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [step, onEnd]);
@@ -1149,7 +1174,7 @@ function Tour({ t, onEnd }) {
 
   return (
     <div className="tour" role="dialog" aria-modal="true" aria-label={text}>
-      <div className={isStep ? 'tourshade' : 'tourshade dim'} onClick={onEnd} />
+      <div className={isStep ? 'tourshade' : 'tourshade dim'} onClick={() => onEnd(false)} />
       {isStep && <div className="tourspot" style={box} />}
       <div className={isStep ? 'tourcard' : 'tourcard center'} ref={cardRef} style={style}>
         {!isStep && (
@@ -1167,12 +1192,18 @@ function Tour({ t, onEnd }) {
             </span>
           )}
           {step !== 'thanks' && (
-            <button type="button" className="tourskip" onClick={onEnd}>
+            <button type="button" className="tourskip" onClick={() => onEnd(false)}>
               {t.skip}
             </button>
           )}
-          <button type="button" className="tournext" onClick={step === 'thanks' ? onEnd : next}>
-            {step === 'ask' ? t.startTour : step === 'thanks' ? t.finish : t.next}
+          <button type="button" className="tournext" onClick={step === 'thanks' ? () => onEnd(true) : next}>
+            {step === 'ask'
+              ? t.startTour
+              : step === 'thanks'
+                ? t.finish
+                : step === TOUR.length - 1 && !thanks
+                  ? t.done
+                  : t.next}
           </button>
         </div>
       </div>
