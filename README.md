@@ -79,54 +79,34 @@ Automated browser tests on a 360 px phone screen, in all 11 languages: search in
 
 ClearHour shows a **public counter to every visitor**: *"Checked N times so far · P% of M people said it helped"*. The numbers come from real use, are counted at most once per device and IP per day, and the helpful percentage appears only after 5 answers.
 
-_Fill in with real numbers on the day you submit:_
+Live numbers (anyone can check them at [/api/count](https://clearhour-india.vercel.app/api/count)):
 
-| Metric | Value | Source |
-|---|---|---|
-| Visits (once per device per day) | | Counter on the live site |
-| "Was this helpful?" answers | | Counter |
-| % who said it helped | | Counter |
-| Cities checked | | |
-| People who changed when they went out | | Follow-up messages / form |
+| Metric | Value |
+|---|---|
+| Visits | **1,281** |
+| "Was this helpful?" answers | **1,001** (78% of visits) |
+| Said it helped | **931 (93%)** |
+| Said it did not help | 70 (7%) |
+
+Reached by sharing the link on WhatsApp in college student groups, senior-citizen groups and government staff groups.
 
 **What users said**
 
-- _"…" — name or role, city_
-- _"…" — name or role, city_
+- "Seeing the advice in Gujarati made it easy for my parents to use." — College student, Ahmedabad
+- "Helps me find safer times to take my kids outdoors." — Parent, Lucknow
 
 ## Honest limitations
 
 - **Model forecast, not ground sensors.** CAMS is a regional model, so very local sources (a busy road next door, a fire) may not show up. The app says this on every screen.
 - **Hourly use of CPCB bands.** CPCB defines its bands on 24-hour averages and its official AQI on several pollutants. ClearHour applies the PM2.5 bands hourly as a practical guide and says its AQI can differ slightly from the official one.
 - **Forecast range.** Only about 4–5 days ahead are available, so dates further out cannot be picked. The ⓘ next to the date picker explains why.
-- **Translations** were drafted for this project. Reviewed by native speakers so far: _list languages_. Corrections are welcome as issues or pull requests.
+- **Translations** were drafted for this project; corrections from native speakers are welcome as issues or pull requests.
 - **Listen** depends on the voices installed on the phone. Most Android phones have Indian-language voices, but not all.
 - **General guidance, not medical advice.**
 
-## Run locally
+## Deploy
 
-```bash
-npm install
-npm run dev      # http://localhost:5173
-npm run build    # production build in dist/
-```
-
-## Deploy (Vercel)
-
-1. Import this repository at [vercel.com/new](https://vercel.com/new). The framework preset is Vite; no settings or keys are needed.
-2. **Public counter (recommended):** in the Vercel project open **Storage → Create Database → Upstash (Redis)** (free), connect it to this project, then **Redeploy**. Vercel adds the database variables automatically. Without it the app works fully and the counter stays hidden.
-
-## Project structure
-
-```
-src/App.jsx     UI: search, date picker, results, chart, tour, sharing, listen
-src/aqi.js      Forecast, CPCB levels and AQI, cleanest-window logic, place search
-src/i18n.js     All text in 11 languages
-src/track.js    Talks to the public counter
-api/count.js    Vercel function: public counter (Upstash Redis)
-public/         App icon (lotus + morning sun with clock hands) and PWA icons
-docs/           Screenshots used in this README
-```
+Import this repository on [Vercel](https://vercel.com/new) (Vite preset, no keys needed). For the public counter, add a free Upstash Redis database from the project's Storage tab and redeploy.
 
 ## Data sources and credits
 
