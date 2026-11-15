@@ -80,11 +80,11 @@ Automated browser tests on a 360 px phone screen, in all 11 languages: search in
 
 ClearHour shows a **public counter to every visitor**: *"Checked N times so far · P% of M people said it helped"*. The numbers come from real use, are counted at most once per device and IP per day, and the helpful percentage appears only after 5 answers.
 
-Live numbers (anyone can check them at [/api/count](https://clearhour-india.vercel.app/api/count)):
+Numbers as of **15 Nov 2026**. The live counter keeps growing; anyone can check the current totals at [/api/count](https://clearhour-india.vercel.app/api/count).
 
 | Metric | Value |
 |---|---|
-| Visits | **1,281** |
+| Visits | **1,282** |
 | "Was this helpful?" answers | **1,001** (78% of visits) |
 | Said it helped | **931 (93%)** |
 | Said it did not help | 70 (7%) |
