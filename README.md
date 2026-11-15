@@ -104,6 +104,13 @@ Reached by sharing the link on WhatsApp in college student groups, senior-citize
 - **Listen** depends on the voices installed on the phone. Most Android phones have Indian-language voices, but not all.
 - **General guidance, not medical advice.**
 
+## Run locally
+
+```bash
+npm install
+npm run dev    # opens on http://localhost:5173
+```
+
 ## Deploy
 
 Import this repository on [Vercel](https://vercel.com/new) (Vite preset, no keys needed). For the public counter, add a free Upstash Redis database from the project's Storage tab and redeploy.
