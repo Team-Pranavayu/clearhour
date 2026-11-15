@@ -7,6 +7,7 @@ ClearHour is a free web app that reads the air-quality forecast for any town in 
 | | |
 |---|---|
 | **Live app** | **[clearhour-india.vercel.app](https://clearhour-india.vercel.app)** |
+| **Demo video (1:38)** | [youtu.be/jXK2xxEZdu0](https://youtu.be/jXK2xxEZdu0) |
 | **Source code** | [github.com/Team-Pranavayu/clearhour](https://github.com/Team-Pranavayu/clearhour) |
 | **Team** | Team Pranavayu: Harshit Bhalani ([@HarshitBhalani](https://github.com/HarshitBhalani)) |
 | **Impact area** | Clean Air |
